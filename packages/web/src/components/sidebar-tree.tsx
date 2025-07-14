@@ -9,7 +9,7 @@ import { NodeRendererProps, Tree, TreeApi } from "react-arborist";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { NavArrowRight, Page } from "iconoir-react";
 import { MenuContext, MenuContextMenuItem } from "../contexts/menu-context";
-import { TreeNode } from "../api/tree";
+import { TreeNode, TreeStructure } from "../api/tree";
 import { AuthContext } from "../contexts/auth-context";
 import { StorageContext } from "../contexts/storage-context";
 import { TextPromptComponent } from "./text-prompt";
@@ -50,9 +50,34 @@ export const SidebarTree = () => {
     null
   );
 
-  const treeHeight = treeRef
-    ? treeRef.visibleNodes.length * treeRef.rowHeight
-    : 69;
+  // I hate that this is necessary. I am sorry for my sins. Sincerely... I am.
+  const treeHeight = useMemo(() => {
+    if (!tree) {
+      return 1000;
+    }
+
+    const getSize = (children: TreeStructure): number => {
+      let sum = 0;
+
+      for (const child of children) {
+        sum += 1;
+
+        if (
+          child.type === "folder" &&
+          child.children &&
+          typeof storageData.treeInitialExpanded[child.id] === "undefined"
+        ) {
+          sum += getSize(child.children);
+        }
+      }
+
+      return sum;
+    };
+
+    const visibleNodesCount = getSize(tree);
+
+    return visibleNodesCount * (treeRef?.rowHeight || 34);
+  }, [storageData, tree, treeRef]);
 
   const contextHandleSelect = useCallback(
     (id: string) => {
