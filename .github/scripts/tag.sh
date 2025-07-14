@@ -18,3 +18,11 @@ git tag -a $VERSION -m "Version $VERSION"
 
 echo "Pushing tags"
 git push origin $VERSION
+
+# Trigger release process
+curl -X POST \
+  -s \
+  "$JOBBER_NOTEE_URL" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $JOBBER_NOTEE_AUTH" \
+  -d "{\"tag\": \"$VERSION\"}"

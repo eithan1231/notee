@@ -12,3 +12,6 @@ jobs:
 
       - name: Create tag
         run: bash ./.github/scripts/tag.sh
+        env:
+          JOBBER_NOTEE_URL: ${{ secrets.JOBBER_NOTEE_URL }}
+          JOBBER_NOTEE_AUTH: ${{ secrets.JOBBER_NOTEE_AUTH }}
