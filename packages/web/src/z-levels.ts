@@ -1,0 +1,4 @@
+export const Z_LEVELS = {
+  CONTEXT_MENU_BACKGROUND: 1000,
+  CONTEXT_MENU_MENU: 1010,
+} as const;

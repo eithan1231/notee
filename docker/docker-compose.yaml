@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=notee-username
+      - POSTGRES_PASSWORD=notee-password
+      - POSTGRES_DB=notee-database
+    ports:
+      - 8232:5432

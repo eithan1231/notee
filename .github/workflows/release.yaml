@@ -1,0 +1,14 @@
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Create tag
+        run: bash ./.github/scripts/tag.sh

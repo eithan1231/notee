@@ -1,0 +1,39 @@
+{
+  "name": "@notee/api",
+  "version": "1.0.0",
+  "description": "Notee Backend API",
+  "main": "./dist/app.js",
+  "type": "module",
+  "scripts": {
+    "build:image": "docker build -t notee ./",
+    "build": "rimraf ./dist/* && tsc && tsc-alias -p tsconfig.json",
+    "start": "node ./dist/entry-serve.js",
+    "dev": "pnpm build && node --env-file-if-exists=.env ./dist/entry-serve.js",
+    "drizzle:migrate": "pnpm build && pnpm drizzle-kit migrate",
+    "drizzle:generate": "pnpm build && pnpm drizzle-kit generate"
+  },
+  "keywords": [],
+  "author": "Eithan Hersey-Tuit",
+  "license": "MIT",
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "bcryptjs": "^3.0.2",
+    "cron": "^3.2.1",
+    "drizzle-orm": "^0.38.2",
+    "hono": "^4.6.11",
+    "jose": "^6.0.10",
+    "mqtt": "^5.10.3",
+    "pg": "^8.13.1",
+    "prom-client": "^15.1.3",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.16.12",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.30.1",
+    "rimraf": "^5.0.10",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^5.6.3"
+  }
+}
