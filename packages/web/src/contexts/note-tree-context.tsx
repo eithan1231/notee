@@ -237,10 +237,25 @@ export const NoteTreeProvider = ({
         };
 
         const result = await apiTreeSet(genericApiContext, newTree);
+        const notesResult = await apiNotes(genericApiContext);
 
         if (result.success) {
           setTree(newTree);
           setTreeServer(newTree);
+        } else {
+          console.error(
+            "[addNodeFolder] Failed to update tree after adding folder:",
+            result.message
+          );
+        }
+
+        if (notesResult.success) {
+          setNotesServer(notesResult.data.notes);
+        } else {
+          console.error(
+            "[addNodeFolder] Failed to fetch notes after adding folder:",
+            notesResult.message
+          );
         }
       } finally {
         setIsBlocked(false);
@@ -285,10 +300,25 @@ export const NoteTreeProvider = ({
         };
 
         const result = await apiTreeSet(genericApiContext, newTree);
+        const notesResult = await apiNotes(genericApiContext);
 
         if (result.success) {
           setTree(newTree);
           setTreeServer(newTree);
+        } else {
+          console.error(
+            "[addNodeNote] Failed to update tree after adding note:",
+            result.message
+          );
+        }
+
+        if (notesResult.success) {
+          setNotesServer(notesResult.data.notes);
+        } else {
+          console.error(
+            "[addNodeNote] Failed to fetch notes after adding note:",
+            notesResult.message
+          );
         }
       } finally {
         setIsBlocked(false);
@@ -325,10 +355,25 @@ export const NoteTreeProvider = ({
       };
 
       const result = await apiTreeSet(genericApiContext, newTree);
+      const notesResult = await apiNotes(genericApiContext);
 
       if (result.success) {
         setTree(result.data);
         setTreeServer(result.data);
+      } else {
+        console.error(
+          "[setNodeFolderTitle] Failed to update tree after setting folder title:",
+          result.message
+        );
+      }
+
+      if (notesResult.success) {
+        setNotesServer(notesResult.data.notes);
+      } else {
+        console.error(
+          "[setNodeFolderTitle] Failed to fetch notes after setting folder title:",
+          notesResult.message
+        );
       }
     } finally {
       setIsBlocked(false);
@@ -374,10 +419,25 @@ export const NoteTreeProvider = ({
       };
 
       const result = await apiTreeSet(genericApiContext, newTree);
+      const notesResult = await apiNotes(genericApiContext);
 
       if (result.success) {
         setTree(result.data);
         setTreeServer(result.data);
+      } else {
+        console.error(
+          "[setNodePosition] Failed to update tree after setting node position:",
+          result.message
+        );
+      }
+
+      if (notesResult.success) {
+        setNotesServer(notesResult.data.notes);
+      } else {
+        console.error(
+          "[setNodePosition] Failed to fetch notes after setting node position:",
+          notesResult.message
+        );
       }
     } finally {
       setIsBlocked(false);
@@ -409,10 +469,25 @@ export const NoteTreeProvider = ({
       };
 
       const result = await apiTreeSet(genericApiContext, newTree);
+      const notesResult = await apiNotes(genericApiContext);
 
       if (result.success) {
         setTree(result.data);
         setTreeServer(result.data);
+      } else {
+        console.error(
+          "[removeNode] Failed to update tree after removing node:",
+          result.message
+        );
+      }
+
+      if (notesResult.success) {
+        setNotesServer(notesResult.data.notes);
+      } else {
+        console.error(
+          "[removeNode] Failed to fetch notes after removing node:",
+          notesResult.message
+        );
       }
     } finally {
       setIsBlocked(false);

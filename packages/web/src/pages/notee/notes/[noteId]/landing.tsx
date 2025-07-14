@@ -191,34 +191,32 @@ const Component = () => {
             className="text-2xl font-bold mb-4 w-full text-center focus:outline-none"
           />
 
-          {noteContent && (
-            <textarea
-              id={`note-content-${note.id}`}
-              disabled={isBusy}
-              onChange={(e) => {
-                setNoteContent((previous) => {
-                  console.log(previous, e.target.value);
-                  if (previous === null) {
-                    return null;
-                  }
+          <textarea
+            id={`note-content-${note.id}`}
+            disabled={isBusy}
+            onChange={(e) => {
+              setNoteContent((previous) => {
+                console.log(previous, e.target.value);
+                if (previous === null) {
+                  return null;
+                }
 
-                  return e.target.value;
-                });
-              }}
-              defaultValue={noteContent}
-              style={{
-                scrollbarWidth: "thin",
-              }}
-              className={`
+                return e.target.value;
+              });
+            }}
+            defaultValue={noteContent}
+            style={{
+              scrollbarWidth: "thin",
+            }}
+            className={`
               w-full h-[calc(100%-3rem)]
               p-2 md:p-4
               border rounded-lg
               overflow-auto outline-none resize-none
               h-fit-content
             `}
-              placeholder="Start writing your note here..."
-            ></textarea>
-          )}
+            placeholder="Start writing your note here..."
+          ></textarea>
 
           <div className="py-2 flex items center justify-between">
             <span className="text-gray-500 text-sm">
