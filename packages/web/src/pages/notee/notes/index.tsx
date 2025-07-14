@@ -48,7 +48,7 @@ const Component = () => {
     removeActiveEditor,
     setActiveEditor,
   } = useContext(AuthContext);
-  const { tree, addNodeFolder, addNodeNote } = useContext(NoteTreeContext);
+  const { addNodeFolder, addNodeNote } = useContext(NoteTreeContext);
   const storageContext = useContext(StorageContext);
 
   const sidebarRef = useRef<HTMLElement | null>(null);
