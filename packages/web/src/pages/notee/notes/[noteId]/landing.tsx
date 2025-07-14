@@ -34,6 +34,7 @@ const Component = () => {
     }
 
     if (!authInitialLoad) {
+      console.log("[ViewNote] Waiting for auth to load");
       return;
     }
 
@@ -45,6 +46,10 @@ const Component = () => {
       );
       return;
     }
+
+    setNote(null);
+    setNoteTitle(null);
+    setNoteContent(null);
 
     setIsBusy(true);
     apiGetNote(apiContext, noteId)
@@ -85,6 +90,7 @@ const Component = () => {
       noteId == null ||
       key === null
     ) {
+      console.log("[ViewNote] Skipping auto-refresh due to conditions not met");
       return;
     }
 
@@ -155,7 +161,7 @@ const Component = () => {
     }
   }, [note, noteId, noteTitle, noteContent, key, apiContext]);
 
-  if (note === null || noteTitle === null || noteContent === null) {
+  if (!noteId || note === null || noteTitle === null || noteContent === null) {
     return (
       <div className="flex items-center justify-center h-full">
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -185,31 +191,34 @@ const Component = () => {
             className="text-2xl font-bold mb-4 w-full text-center focus:outline-none"
           />
 
-          <textarea
-            disabled={isBusy}
-            onChange={(e) => {
-              setNoteContent((previous) => {
-                console.log(previous, e.target.value);
-                if (previous === null) {
-                  return null;
-                }
+          {noteContent && (
+            <textarea
+              id={`note-content-${note.id}`}
+              disabled={isBusy}
+              onChange={(e) => {
+                setNoteContent((previous) => {
+                  console.log(previous, e.target.value);
+                  if (previous === null) {
+                    return null;
+                  }
 
-                return e.target.value;
-              });
-            }}
-            defaultValue={noteContent}
-            style={{
-              scrollbarWidth: "thin",
-            }}
-            className={`
+                  return e.target.value;
+                });
+              }}
+              defaultValue={noteContent}
+              style={{
+                scrollbarWidth: "thin",
+              }}
+              className={`
               w-full h-[calc(100%-3rem)]
               p-2 md:p-4
               border rounded-lg
               overflow-auto outline-none resize-none
               h-fit-content
             `}
-            placeholder="Start writing your note here..."
-          ></textarea>
+              placeholder="Start writing your note here..."
+            ></textarea>
+          )}
 
           <div className="py-2 flex items center justify-between">
             <span className="text-gray-500 text-sm">
