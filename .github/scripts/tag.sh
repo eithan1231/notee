@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 echo "Installing git-cliff"
 npm install -g git-cliff@2.9.1
@@ -21,16 +21,19 @@ git push origin $VERSION
 
 # Trigger release process
 echo "Triggering release process"
-curl -X POST \
+HTTP_STATUS=$(curl -X POST \
   -s \
+  -w "%{http_code}" \
+  -o /tmp/response.txt \
   "$JOBBER_NOTEE_URL" \
   -H "Content-Type: application/json" \
   -H "Authorization: $JOBBER_NOTEE_AUTH" \
-  -d "{\"tag\": \"$VERSION\"}"
+  -d "{\"tag\": \"$VERSION\"}")
 
-RELEASE_STATUS=$?
+echo "HTTP Status: $HTTP_STATUS"
+echo "Response: $(cat /tmp/response.txt)"
 
-if [ $RELEASE_STATUS -ne 0 ]; then
-  echo "Release process failed with status $RELEASE_STATUS"
-  exit $RELEASE_STATUS
+if [ "$HTTP_STATUS" -ne 200 ] && [ "$HTTP_STATUS" -ne 201 ]; then
+  echo "Release process failed with HTTP status $HTTP_STATUS"
+  exit 1
 fi
