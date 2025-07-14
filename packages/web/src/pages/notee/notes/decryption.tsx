@@ -21,7 +21,13 @@ const Component = () => {
     }
 
     const returnPage = searchParams.get("return");
-    navigate(returnPage || "/notee/notes/");
+
+    if (returnPage?.startsWith("/notee/notes/")) {
+      navigate(returnPage);
+      return;
+    }
+
+    navigate("/notee/notes/");
   }, [initialLoad, key, navigate, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -10,6 +10,7 @@ type Command = {
   type: "navigate-system" | "action" | "navigate-note";
   name: string;
   description: string;
+  keywords: string[];
   action: () => void;
 };
 
@@ -43,6 +44,7 @@ export const CommandPalletComponent = () => {
           type: "navigate-note",
           name: note.title,
           description: `Open Note`,
+          keywords: ["note"],
           action: () => {
             navigate(`/notee/notes/${note.id}`);
           },
@@ -56,6 +58,7 @@ export const CommandPalletComponent = () => {
         type: "action",
         name: " Create New Note",
         description: "Create a new note",
+        keywords: ["new", "note", "create", "add"],
         action: async () => {
           const noteResult = await apiCreateNote(apiContext, {
             title: "New Note",
@@ -80,6 +83,7 @@ export const CommandPalletComponent = () => {
         type: "action",
         name: "Create New Folder",
         description: "Create a new folder",
+        keywords: ["new", "folder", "create", "add"],
         action: () => {
           addNodeFolder(null, 0, "New Folder");
         },
@@ -92,6 +96,7 @@ export const CommandPalletComponent = () => {
         type: "action",
         name: "Toggle Active Editor",
         description: "Toggles the active editor state",
+        keywords: ["toggle", "editor", "active", "set"],
         action: () => {
           removeActiveEditor();
         },
@@ -102,6 +107,7 @@ export const CommandPalletComponent = () => {
         type: "action",
         name: "Toggle Active Editor",
         description: "Toggles the active editor state",
+        keywords: ["toggle", "editor", "active", "set"],
         action: () => {
           setActiveEditor();
         },
@@ -114,6 +120,14 @@ export const CommandPalletComponent = () => {
         type: "navigate-system",
         name: "Decrypt Notes",
         description: "Navigate to decryption page",
+        keywords: [
+          "decrypt",
+          "notes",
+          "unlock",
+          "decryption",
+          "password",
+          "notes",
+        ],
         action: () => {
           navigate("/notee/notes/decryption");
         },
@@ -125,6 +139,7 @@ export const CommandPalletComponent = () => {
       type: "navigate-system",
       name: "Home",
       description: "Navigate to home page",
+      keywords: ["home", "dashboard", "main"],
       action: () => {
         navigate("/notee/notes/");
       },
@@ -135,6 +150,7 @@ export const CommandPalletComponent = () => {
       type: "navigate-system",
       name: "Settings",
       description: "Navigate to settings page",
+      keywords: ["settings", "configuration", "preferences"],
       action: () => {
         navigate("/notee/notes/settings");
       },
@@ -190,6 +206,13 @@ export const CommandPalletComponent = () => {
         if (command.description.toLowerCase().includes(keyword)) {
           return acc + 5;
         }
+
+        for (const commandKeywords of command.keywords) {
+          if (commandKeywords.toLowerCase().includes(keyword)) {
+            return acc + 3;
+          }
+        }
+
         return acc;
       }, 0);
 

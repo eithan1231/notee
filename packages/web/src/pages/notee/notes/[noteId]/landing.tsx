@@ -58,10 +58,18 @@ const Component = () => {
         setNote(result.data.note);
         setNoteTitle(result.data.note.title);
 
+        if (result.data.note.content.length === 0) {
+          return "";
+        }
+
         return decrypt(key, result.data.note.content);
       })
       .then((content) => {
         setNoteContent(content);
+      })
+      .catch((err) => {
+        console.error("[ViewNote] Error fetching or decrypting note:", err);
+        setError("Failed to load note content");
       })
       .finally(() => {
         setIsBusy(false);
@@ -150,6 +158,7 @@ const Component = () => {
   if (note === null || noteTitle === null || noteContent === null) {
     return (
       <div className="flex items-center justify-center h-full">
+        {error && <div className="text-red-500 mb-4">{error}</div>}
         <p className="text-gray-600">Loading note...</p>
       </div>
     );

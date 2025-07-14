@@ -2,6 +2,7 @@ import {
   EditPencil,
   Eye,
   FolderPlus,
+  Lock,
   Menu,
   PagePlus,
   Settings,
@@ -32,13 +33,22 @@ import LandingComponent from "./landing";
 import SettingsComponent from "./settings";
 import DecryptionComponent from "./decryption";
 import { CommandPalletComponent } from "../../../components/command-pallet";
+import { apiCreateNote } from "../../../api/note";
+import { encrypt } from "../../../util/encryption";
 
 const Component = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { displayMode } = useDisplayMode();
-  const authContext = useContext(AuthContext);
-  const { tree, addNodeFolder } = useContext(NoteTreeContext);
+  const {
+    key,
+    auth,
+    apiContext,
+    authInitialised,
+    removeActiveEditor,
+    setActiveEditor,
+  } = useContext(AuthContext);
+  const { tree, addNodeFolder, addNodeNote } = useContext(NoteTreeContext);
   const storageContext = useContext(StorageContext);
 
   const sidebarRef = useRef<HTMLElement | null>(null);
@@ -132,29 +142,51 @@ const Component = () => {
   }, [resize, stopResizing]);
 
   useEffect(() => {
-    if (authContext.authInitialised && !authContext.auth) {
+    if (authInitialised && !auth) {
       navigate("/notee/auth/login");
     }
-  }, [authContext.authInitialised, authContext.auth, navigate]);
+  }, [authInitialised, auth, navigate]);
 
   const toggleEditorMode = useCallback(() => {
-    if (!authContext.auth) {
+    if (!auth) {
       return;
     }
 
-    if (authContext.auth.other.isActiveEditor) {
-      authContext.removeActiveEditor();
+    if (auth.other.isActiveEditor) {
+      removeActiveEditor();
     } else {
-      authContext.setActiveEditor();
+      setActiveEditor();
     }
-  }, [authContext.authInitialised, authContext.auth]);
+  }, [authInitialised, auth]);
 
   const handleCreateNote = useCallback(async () => {
-    // const note = await notesContext.createEmptyNote();
-    // if (note) {
-    //   navigate(`/notee/notes/${note}/`);
-    //   return;
-    // }
+    if (auth?.other.isActiveEditor === false) {
+      console.warn(
+        "Cannot create note in read-only mode. Enable editor mode to create notes."
+      );
+      return;
+    }
+
+    if (!key) {
+      console.warn("No encryption key available. Cannot create note.");
+      return;
+    }
+
+    const content = await encrypt(key, "");
+
+    const note = await apiCreateNote(apiContext, {
+      title: "Untitled Note",
+      content,
+    });
+
+    if (!note.success) {
+      console.error("Failed to create note:", note.message);
+      return;
+    }
+
+    await addNodeNote(null, 0, note.data.note.id);
+
+    navigate(`/notee/notes/${note.data.note.id}/`);
   }, [navigate]);
 
   const handleCreateFolder = useCallback(async () => {
@@ -178,19 +210,15 @@ const Component = () => {
           <h1 className="text-xl font-semibold inline">Notee</h1>
 
           <button
-            // disabled={authContext.isUpdatingActiveEditor}
+            // disabled={isUpdatingActiveEditor}
             onClick={toggleEditorMode}
             className={`
             border-transparent focus:border-transparent focus:ring-0
             relative inline-flex h-6 w-11 items-center rounded-full
             transition-colors focus:outline-none
+            ${auth?.other.isActiveEditor ? "bg-blue-600" : "bg-gray-200"}
             ${
-              authContext.auth?.other.isActiveEditor
-                ? "bg-blue-600"
-                : "bg-gray-200"
-            }
-            ${
-              // authContext.isUpdatingActiveEditor
+              // isUpdatingActiveEditor
               false ? "opacity-50 cursor-not-allowed" : ""
             }
           `}
@@ -198,14 +226,10 @@ const Component = () => {
             <span
               className={`
               inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-              ${
-                authContext.auth?.other.isActiveEditor
-                  ? "translate-x-6"
-                  : "translate-x-1"
-              }
+              ${auth?.other.isActiveEditor ? "translate-x-6" : "translate-x-1"}
             `}
             >
-              {authContext.auth?.other.isActiveEditor ? (
+              {auth?.other.isActiveEditor ? (
                 <EditPencil className="w-3 h-3 text-blue-600 m-0.5" />
               ) : (
                 <Eye className="w-3 h-3 text-gray-600 m-0.5" />
@@ -246,23 +270,33 @@ const Component = () => {
               }}
             >
               <div className="px-4 pt-4 pb-4 flex align-center">
-                {authContext.auth?.other.isActiveEditor && (
-                  <>
-                    <button
-                      onClick={handleCreateNote}
-                      className="mr-10 text-gray-600 hover:text-blue-800 align-center"
-                    >
-                      <PagePlus className="w-5 h-5 mr-1" /> Note
-                    </button>
-
-                    <button
-                      onClick={handleCreateFolder}
-                      className="mr-10 text-gray-600 hover:text-blue-800"
-                    >
-                      <FolderPlus className="w-5 h-5 mr-1" /> Folder
-                    </button>
-                  </>
+                {!key && (
+                  <Link
+                    to="/notee/notes/decryption/"
+                    className="mr-10 text-gray-600 hover:text-blue-800 align-center"
+                  >
+                    <Lock className="w-5 h-5 mr-1" /> Unlock
+                  </Link>
                 )}
+
+                {key && auth?.other.isActiveEditor && (
+                  <button
+                    onClick={handleCreateNote}
+                    className="mr-10 text-gray-600 hover:text-blue-800 align-center"
+                  >
+                    <PagePlus className="w-5 h-5 mr-1" /> Note
+                  </button>
+                )}
+
+                {key && auth?.other.isActiveEditor && (
+                  <button
+                    onClick={handleCreateFolder}
+                    className="mr-10 text-gray-600 hover:text-blue-800"
+                  >
+                    <FolderPlus className="w-5 h-5 mr-1" /> Folder
+                  </button>
+                )}
+
                 <Link
                   to="/notee/notes/settings"
                   className=" text-gray-600 hover:text-blue-800"
@@ -271,7 +305,7 @@ const Component = () => {
                 </Link>
               </div>
 
-              {!authContext.auth?.other.isActiveEditor && (
+              {!auth?.other.isActiveEditor && (
                 <div className="text-sm text-gray-500 italic">
                   <p className="px-4 pt-2">
                     You are in read-only mode. Enable editor mode to create and
