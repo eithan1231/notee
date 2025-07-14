@@ -187,11 +187,11 @@ const Component = () => {
     await addNodeNote(null, 0, note.data.note.id);
 
     navigate(`/notee/notes/${note.data.note.id}/`);
-  }, [navigate]);
+  }, [apiContext, addNodeNote, auth, key, navigate]);
 
   const handleCreateFolder = useCallback(async () => {
     await addNodeFolder(null, 0, "New Folder");
-  }, [tree]);
+  }, [addNodeFolder]);
 
   return (
     <>
