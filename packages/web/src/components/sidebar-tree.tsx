@@ -131,7 +131,7 @@ export const SidebarTree = () => {
       return;
     }
 
-    removeNode(deleteNodeId);
+    await removeNode(deleteNodeId);
 
     setDeleteNodeId(null);
   }, [deleteNodeId, tree]);
@@ -155,7 +155,7 @@ export const SidebarTree = () => {
           }}
           onSubmit={handleFolderDeletePromptCallback}
           title="Delete Folder"
-          message="Are you sure you want to delete this folder? This action cannot be undone."
+          message="Are you sure you want to delete this item? This action is irreversible."
         />
       )}
 

@@ -14,12 +14,13 @@ import {
   TreeNodeNote,
   TreeStructure,
 } from "../api/tree";
-import { apiNotes, NoteBasic } from "../api/note";
+import { apiDeleteNote, apiNotes, NoteBasic } from "../api/note";
 import {
   treeStructureFindAndRemove,
   treeStructureInsertDanglers,
   treeStructureInsert,
   treeStructureUpdateFolderTitle,
+  treeStructureFlattenNotes,
 } from "../util/tree-structure";
 import { AuthContext } from "./auth-context";
 
@@ -458,10 +459,24 @@ export const NoteTreeProvider = ({
     try {
       setIsBlocked(true);
 
-      const { newStructure: treeUpdated } = treeStructureFindAndRemove(
-        tree.structure,
-        nodeId
-      );
+      const { newStructure: treeUpdated, node: removedNode } =
+        treeStructureFindAndRemove(tree.structure, nodeId);
+
+      console.log("[removeNode] Removing node:", removedNode);
+
+      if (removedNode) {
+        const removedNotes = treeStructureFlattenNotes([removedNode]);
+
+        for (const note of removedNotes) {
+          console.log("[removeNode] Deleting note:", note.id);
+          await apiDeleteNote(genericApiContext, note.id).catch((err) => {
+            console.error(
+              `[removeNode] Failed to delete note ${note.id}:`,
+              err
+            );
+          });
+        }
+      }
 
       const newTree = {
         revision: tree.revision + 1,

@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { AuthContext } from "../../../contexts/auth-context";
 import { NoteTreeContext } from "../../../contexts/note-tree-context";
-// import { NotesContext } from "../../../contexts/notes-context-old";
 
 const Component = () => {
   const { auth, authInitialised: authInitialLoad } = useContext(AuthContext);

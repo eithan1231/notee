@@ -26,5 +26,10 @@ export const useDisplayMode = () => {
     return "desktop";
   }, [windowWidth]);
 
-  return { displayMode, windowWidth };
+  // Target fullscreen 1080p
+  const isExtraExtraLarge = useMemo(() => {
+    return windowWidth >= 1900; // 1920 is full hd, this just gives a bit of a buffer.
+  }, [windowWidth]);
+
+  return { displayMode, isExtraExtraLarge, windowWidth };
 };

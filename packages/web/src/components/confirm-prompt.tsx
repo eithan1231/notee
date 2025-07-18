@@ -11,7 +11,7 @@ export const ConfirmPromptComponent = ({
   onCancel: () => void;
 }) => {
   return (
-    <div onClick={onCancel} className="fixed inset-0 z-[1000]">
+    <div onClick={onCancel} className="fixed inset-0 z-[1000] bg-black/5">
       <div
         onClick={(e) => e.stopPropagation()}
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg"

@@ -36,6 +36,10 @@ honoNote.get("/:noteId", createMiddlewareAuth(), async (c, next) => {
   const noteId = c.req.param("noteId");
   const auth = c.get("auth")!;
 
+  if (!noteId) {
+    return next();
+  }
+
   const note = (
     await getDrizzle()
       .select({
@@ -117,6 +121,10 @@ honoNote.patch(
     const noteId = c.req.param("noteId");
     const auth = c.get("auth")!;
 
+    if (!noteId) {
+      return next();
+    }
+
     const schema = z.object({
       title: z.string().optional(),
       content: z.string().optional(),
@@ -190,12 +198,41 @@ honoNote.delete(
   createMiddlewareAuth({
     validateHasEditPermission: true,
   }),
-  async (c) => {
+  async (c, next) => {
+    const noteId = c.req.param("noteId");
     const auth = c.get("auth")!;
 
-    return c.json({
-      success: false,
-      message: "Not implemented yet",
+    if (!noteId) {
+      return next();
+    }
+
+    const note = await getDrizzle()
+      .select()
+      .from(noteTable)
+      .where(
+        and(
+          eq(noteTable.userId, auth.user.id),
+          eq(noteTable.id, c.req.param("noteId"))
+        )
+      )
+      .limit(1)
+      .then((rows) => rows[0]);
+
+    if (!note) {
+      next();
+    }
+
+    return await withLock("note", note.id, async () => {
+      await getDrizzle()
+        .delete(noteTable)
+        .where(
+          and(eq(noteTable.userId, auth.user.id), eq(noteTable.id, noteId))
+        );
+
+      return c.json({
+        success: true,
+        message: "Note deleted successfully",
+      });
     });
   }
 );

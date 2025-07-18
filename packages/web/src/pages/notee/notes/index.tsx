@@ -28,7 +28,7 @@ import { NoteTreeContext } from "../../../contexts/note-tree-context";
 import { StorageContext } from "../../../contexts/storage-context";
 import { useDisplayMode } from "../../../hooks/display-mode";
 
-import NoteEditComponent from "./[noteId]/landing";
+import NoteEditComponent from "./[noteId]";
 import LandingComponent from "./landing";
 import SettingsComponent from "./settings";
 import DecryptionComponent from "./decryption";

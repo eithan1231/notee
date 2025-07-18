@@ -1,5 +1,5 @@
 import { NoteBasic } from "../api/note";
-import { TreeNode, TreeStructure } from "../api/tree";
+import { TreeNode, TreeNodeNote, TreeStructure } from "../api/tree";
 
 export const treeStructureInsertDanglers = (
   structure: TreeStructure,
@@ -201,4 +201,20 @@ export const treeStructureFindAndRemove = (
     node: null,
     newStructure: structure,
   };
+};
+
+export const treeStructureFlattenNotes = (
+  structure: TreeStructure
+): TreeNodeNote[] => {
+  const notes: TreeNodeNote[] = [];
+
+  for (const node of structure) {
+    if (node.type === "note") {
+      notes.push(node);
+    } else if (node.type === "folder" && node.children) {
+      notes.push(...treeStructureFlattenNotes(node.children));
+    }
+  }
+
+  return notes;
 };

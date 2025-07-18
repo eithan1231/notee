@@ -1,25 +1,23 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AuthContext } from "../../../../contexts/auth-context";
+import { AuthContext } from "../../../contexts/auth-context";
 import ReactMarkdown from "react-markdown";
-import { apiGetNote, apiUpdateNote, Note } from "../../../../api/note";
-import { decrypt, encrypt } from "../../../../util/encryption";
+import { apiGetNote, apiUpdateNote, Note } from "../../../api/note";
+import { decrypt, encrypt } from "../../../util/encryption";
+import { useDisplayMode } from "../../../hooks/display-mode";
 
 const Component = () => {
   const navigate = useNavigate();
+  const { isExtraExtraLarge } = useDisplayMode();
 
-  const {
-    auth,
-    apiContext,
-    authInitialised: authInitialLoad,
-    key,
-  } = useContext(AuthContext);
+  const { auth, apiContext, authInitialised, key } = useContext(AuthContext);
 
   const { noteId } = useParams();
 
   const [note, setNote] = useState<Note | null>(null);
   const [noteTitle, setNoteTitle] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState<string | null>(null);
+  const showPreview = useMemo(() => isExtraExtraLarge, [isExtraExtraLarge]); // TODO: make toggleable
 
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +31,7 @@ const Component = () => {
       return;
     }
 
-    if (!authInitialLoad) {
+    if (!authInitialised) {
       console.log("[ViewNote] Waiting for auth to load");
       return;
     }
@@ -79,12 +77,12 @@ const Component = () => {
       .finally(() => {
         setIsBusy(false);
       });
-  }, [noteId, authInitialLoad]);
+  }, [noteId, authInitialised]);
 
   // Auto refresh when not in edit mode
   useEffect(() => {
     if (
-      !authInitialLoad ||
+      !authInitialised ||
       auth === null ||
       auth.other.isActiveEditor ||
       noteId == null ||
@@ -112,7 +110,7 @@ const Component = () => {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [noteId, auth, authInitialLoad, key]);
+  }, [noteId, auth, authInitialised, key]);
 
   const save = useCallback(async () => {
     console.log("[ViewNote] Saving note...");
@@ -173,7 +171,7 @@ const Component = () => {
   return (
     <div
       key={`viewer-note-${note.id}`}
-      className="px-3 md:px-10 pt-4 pb-16 h-full w-full xl:max-w-[70rem]"
+      className="px-3 md:px-10 pt-4 pb-16 h-full w-full justify-center"
     >
       {auth?.other.isActiveEditor && (
         <>
@@ -191,32 +189,44 @@ const Component = () => {
             className="text-2xl font-bold mb-4 w-full text-center focus:outline-none"
           />
 
-          <textarea
-            id={`note-content-${note.id}`}
-            disabled={isBusy}
-            onChange={(e) => {
-              setNoteContent((previous) => {
-                console.log(previous, e.target.value);
-                if (previous === null) {
-                  return null;
-                }
+          <div className="flex w-full min-h-[calc(100%-3rem)]">
+            <div className={`${showPreview ? "w-1/2 pr-5" : "w-full"}`}>
+              <textarea
+                id={`note-content-${note.id}`}
+                disabled={isBusy}
+                onChange={(e) => {
+                  setNoteContent((prev) => {
+                    if (prev === null) {
+                      return null;
+                    }
 
-                return e.target.value;
-              });
-            }}
-            defaultValue={noteContent}
-            style={{
-              scrollbarWidth: "thin",
-            }}
-            className={`
-              w-full h-[calc(100%-3rem)]
-              p-2 md:p-4
-              border rounded-lg
-              overflow-auto outline-none resize-none
-              h-fit-content
-            `}
-            placeholder="Start writing your note here..."
-          ></textarea>
+                    return e.target.value;
+                  });
+                }}
+                defaultValue={noteContent}
+                style={{
+                  scrollbarWidth: "thin",
+                  ...(showPreview ? { fieldSizing: "content" } : {}),
+                }}
+                className={`
+                  min-h-full
+                  ${!showPreview ? "h-full" : null}
+                  outline-none overflow-auto
+                  p-2 md:p-4
+                  border rounded-lg
+                  resize-none
+                  w-full
+                `}
+                placeholder="Start writing your note here..."
+              ></textarea>
+            </div>
+
+            <div className={` ${showPreview ? "w-1/2 pl-5" : "hidden"}`}>
+              <div className="prose">
+                <ReactMarkdown>{noteContent}</ReactMarkdown>
+              </div>
+            </div>
+          </div>
 
           <div className="py-2 flex items center justify-between">
             <span className="text-gray-500 text-sm">

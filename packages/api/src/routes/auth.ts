@@ -258,6 +258,41 @@ honoAuth.post(
   }
 );
 
+honoAuth.post(
+  "/session-extend",
+  createMiddlewareAuth(),
+  createMiddlewareCsrf(),
+  async (c) => {
+    const auth = c.get("auth")!;
+
+    const schema = z.object({
+      sessionDuration: z.enum(["short", "medium", "long"]).default("medium"),
+    });
+
+    const body = await schema.parseAsync(await c.req.json());
+
+    return await withLock("session", auth.session.id, async () => {
+      await getDrizzle()
+        .update(sessionTable)
+        .set({
+          expiry: createSessionExpiry(body.sessionDuration),
+        })
+        .where(eq(sessionTable.id, auth.session.id));
+
+      setCookie(c, getConfigOption("SESSION_COOKIE_NAME"), auth.session.token, {
+        expires: auth.session.expiry,
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+      });
+
+      return c.json({
+        success: true,
+      });
+    });
+  }
+);
+
 honoAuth.get("/", createMiddlewareAuth(), createMiddlewareCsrf(), async (c) => {
   const auth = c.get("auth")!;
 
