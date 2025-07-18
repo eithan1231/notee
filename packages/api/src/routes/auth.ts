@@ -182,12 +182,79 @@ honoAuth.post(
   }
 );
 
-honoAuth.get(
+honoAuth.post(
+  "/password",
+  createMiddlewareAuth(),
+  createMiddlewareCsrf(),
+  async (c) => {
+    const auth = c.get("auth")!;
+
+    const schema = z.object({
+      currentPassword: z.string().min(32).max(1024),
+      password: z.string().min(32).max(1024),
+      encryption: z.lazy(() => UserEncryptionSchema),
+    });
+
+    const body = await schema.parseAsync(await c.req.json());
+
+    return await withLock("user", auth.user.id, async () => {
+      const isPasswordValid = await compare(
+        body.currentPassword,
+        auth.user.password
+      );
+
+      if (!isPasswordValid) {
+        return c.json(
+          {
+            success: false,
+            message: "Invalid current password",
+          },
+          401
+        );
+      }
+
+      const passwordSalt = await genSalt();
+      const passwordHashed = await hash(body.password, passwordSalt);
+
+      await getDrizzle()
+        .update(userTable)
+        .set({
+          password: passwordHashed,
+          encryption: body.encryption,
+          modified: new Date(),
+        })
+        .where(eq(userTable.id, auth.user.id));
+      //
+
+      return c.json({
+        success: true,
+      });
+    });
+  }
+);
+
+honoAuth.post(
   "/logout",
   createMiddlewareAuth(),
   createMiddlewareCsrf(),
   async (c) => {
+    const auth = c.get("auth")!;
+
+    await getDrizzle()
+      .delete(sessionTable)
+      .where(eq(sessionTable.id, auth.session.id));
     //
+
+    setCookie(c, getConfigOption("SESSION_COOKIE_NAME"), "", {
+      expires: new Date(0),
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+    });
+
+    return c.json({
+      success: true,
+    });
   }
 );
 

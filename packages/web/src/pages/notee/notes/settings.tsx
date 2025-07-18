@@ -1,9 +1,31 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { StorageContext } from "../../../contexts/storage-context";
+import { NavArrowDown } from "iconoir-react";
+import { AuthContext } from "../../../contexts/auth-context";
+import { useNavigate } from "react-router-dom";
 
 const Component = () => {
+  const navigate = useNavigate();
   const { storageData, setStorageData, storageLoaded } =
     useContext(StorageContext);
+
+  const { passwordUpdate, logout } = useContext(AuthContext);
+
+  const [state, setState] = useState<{
+    sectionPasswordUpdate: {
+      visible: boolean;
+      message: { text: string; status: "info" | "error" } | null;
+      currentPassword: string;
+      newPassword: string;
+    };
+  }>({
+    sectionPasswordUpdate: {
+      visible: false,
+      message: null,
+      currentPassword: "",
+      newPassword: "",
+    },
+  });
 
   if (!storageLoaded) {
     return (
@@ -13,12 +35,89 @@ const Component = () => {
     );
   }
 
+  const handleSignOut = async () => {
+    await logout();
+    await navigate("/notee/auth/login");
+  };
+
   const toggleStoreKey = () => {
     if (storageData.shouldStoreKey) {
       setStorageData("shouldStoreKey", false);
       setStorageData("key", null);
     } else {
       setStorageData("shouldStoreKey", true);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    try {
+      setState((prev) => ({
+        ...prev,
+        sectionPasswordUpdate: {
+          ...prev.sectionPasswordUpdate,
+          message: null,
+        },
+      }));
+
+      if (
+        !state.sectionPasswordUpdate.currentPassword ||
+        !state.sectionPasswordUpdate.newPassword
+      ) {
+        setState((prev) => ({
+          ...prev,
+          sectionPasswordUpdate: {
+            ...prev.sectionPasswordUpdate,
+            message: {
+              text: "Please fill in all fields",
+              status: "error",
+            },
+          },
+        }));
+
+        return;
+      }
+
+      const result = await passwordUpdate(
+        state.sectionPasswordUpdate.currentPassword,
+        state.sectionPasswordUpdate.newPassword
+      );
+
+      if (result.success) {
+        setState((prev) => ({
+          ...prev,
+          sectionPasswordUpdate: {
+            ...prev.sectionPasswordUpdate,
+            message: {
+              text: "Password updated successfully",
+              status: "info",
+            },
+          },
+        }));
+      } else {
+        setState((prev) => ({
+          ...prev,
+          sectionPasswordUpdate: {
+            ...prev.sectionPasswordUpdate,
+            message: {
+              text: result.message,
+              status: "error",
+            },
+          },
+        }));
+        return;
+      }
+    } catch (error) {
+      console.error("Password update error:", error);
+      setState((prev) => ({
+        ...prev,
+        sectionPasswordUpdate: {
+          ...prev.sectionPasswordUpdate,
+          message: {
+            text: "An unexpected error occurred",
+            status: "error",
+          },
+        },
+      }));
     }
   };
 
@@ -35,6 +134,24 @@ const Component = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1">
+            <h3 className="text-lg font-medium text-gray-900">Sign Out</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Sign out of your account
+            </p>
+          </div>
+
+          <div className="flex items-center ml-4">
+            <button
+              onClick={handleSignOut}
+              className="bg-red-600 text-white text-sm py-1.5 px-3 rounded-md hover:bg-red-700 transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex-1">
             <h3 className="text-lg font-medium text-gray-900">
               Store Decryption Key
             </h3>
@@ -42,6 +159,7 @@ const Component = () => {
               Keep your decryption key in browser storage for convenience
             </p>
           </div>
+
           <div className="flex items-center ml-4">
             <button
               onClick={toggleStoreKey}
@@ -59,6 +177,129 @@ const Component = () => {
               />
             </button>
           </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div className="m-4 flex-1">
+            <h3 className="text-lg font-medium text-gray-900">
+              Update Password
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Update your account password
+            </p>
+          </div>
+
+          <div
+            className="p-4 sm:px-12"
+            hidden={!state.sectionPasswordUpdate.visible}
+          >
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                handlePasswordUpdate();
+              }}
+              className="space-y-4"
+            >
+              <div>
+                {state.sectionPasswordUpdate.message && (
+                  <div
+                    className={`text-sm mb-2 ${
+                      state.sectionPasswordUpdate.message.status === "error"
+                        ? "text-red-600"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    {state.sectionPasswordUpdate.message.text}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="currentPassword"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Current Password
+                </label>
+                <input
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      sectionPasswordUpdate: {
+                        ...prev.sectionPasswordUpdate,
+                        currentPassword: e.target.value,
+                      },
+                    }))
+                  }
+                  type="password"
+                  id="currentPassword"
+                  name="currentPassword"
+                  required
+                  className="mt-1 block w-full p-1 border-b border-gray-300 transition-colors focus:border-blue-300 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  New Password
+                </label>
+                <input
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      sectionPasswordUpdate: {
+                        ...prev.sectionPasswordUpdate,
+                        newPassword: e.target.value,
+                      },
+                    }))
+                  }
+                  type="password"
+                  id="password"
+                  name="password"
+                  required
+                  className="mt-1 block w-full p-1 border-b border-gray-300 transition-colors focus:border-blue-300 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-sm text-white py-1.5 px-3 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <button
+            className={`
+              w-full border-t border-gray-200
+              text-gray-500 text-sm text-center
+              py-2 px-4
+              hover:bg-gray-50 focus:outline-none
+            `}
+            onClick={() =>
+              setState((prev) => ({
+                ...prev,
+                sectionPasswordUpdate: {
+                  ...prev.sectionPasswordUpdate,
+                  visible: !prev.sectionPasswordUpdate.visible,
+                },
+              }))
+            }
+          >
+            <NavArrowDown
+              className={`
+              inline-block mr-1
+              transition-transform transform ${
+                state.sectionPasswordUpdate.visible ? "rotate-180" : ""
+              }
+            `}
+            />
+          </button>
         </div>
       </div>
     </div>

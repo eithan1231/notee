@@ -9,7 +9,6 @@ import {
   PgColumn,
 } from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
-import { sessionTable } from "./session.js";
 import { sessionTabTable } from "./session-tab.js";
 
 export const UserEncryptionSchema = z.object({

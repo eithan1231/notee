@@ -1,22 +1,25 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../contexts/auth-context";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useConfig } from "../../../hooks/config";
 
 const Component = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const {
-    authInitialised: initialLoad,
-    key,
-    decryptEncryptionKey,
-  } = useContext(AuthContext);
+  const { authInitialised, key, decryptEncryptionKey } =
+    useContext(AuthContext);
+  const { config } = useConfig();
 
   const [password, setPassword] = useState("");
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!initialLoad || !key) {
+    if (config && config.dev.flag && config.dev.autofillPassword) {
+      setPassword((prev) => prev || (config.dev.autofillPassword ?? ""));
+    }
+
+    if (!authInitialised || !key) {
       return;
     }
 
@@ -28,7 +31,7 @@ const Component = () => {
     }
 
     navigate("/notee/notes/");
-  }, [initialLoad, key, navigate, searchParams]);
+  }, [authInitialised, key, navigate, searchParams, config]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,12 +54,16 @@ const Component = () => {
     }
   };
 
-  if (!initialLoad) {
+  if (!authInitialised) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
+
+  if (!config) {
+    return "loading...";
   }
 
   return (
@@ -77,6 +84,7 @@ const Component = () => {
             </label>
             <input
               autoFocus
+              defaultValue={password}
               id="password"
               name="password"
               type="password"

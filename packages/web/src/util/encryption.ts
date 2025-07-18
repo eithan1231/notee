@@ -69,44 +69,54 @@ export const updateUserEncryption = async (
   password: string,
   newPassword: string
 ): Promise<UserEncryptionData> => {
-  const key = await extractUserEncryption(encryptionData, password);
+  try {
+    const key = await extractUserEncryption(encryptionData, password);
 
-  const encryptedKey = await encrypt(
-    {
-      iv: encryptionData.encryptedKeyIv,
-      salt: encryptionData.encryptedKeySalt,
-      password: newPassword,
-    },
-    key.password
-  );
+    const encryptedKey = await encrypt(
+      {
+        iv: encryptionData.encryptedKeyIv,
+        salt: encryptionData.encryptedKeySalt,
+        password: newPassword,
+      },
+      key.password
+    );
 
-  return {
-    encryptedKey,
-    encryptedKeyIv: encryptionData.encryptedKeyIv,
-    encryptedKeySalt: encryptionData.encryptedKeySalt,
-    genericEncryptionIv: encryptionData.genericEncryptionIv,
-    genericEncryptionSalt: encryptionData.genericEncryptionSalt,
-  };
+    return {
+      encryptedKey,
+      encryptedKeyIv: encryptionData.encryptedKeyIv,
+      encryptedKeySalt: encryptionData.encryptedKeySalt,
+      genericEncryptionIv: encryptionData.genericEncryptionIv,
+      genericEncryptionSalt: encryptionData.genericEncryptionSalt,
+    };
+  } catch (error) {
+    console.error("Error updating user encryption:", error);
+    throw error;
+  }
 };
 
 export const extractUserEncryption = async (
   encryptionData: UserEncryptionData,
   password: string
 ) => {
-  const decryptedKey = await decrypt(
-    {
-      iv: encryptionData.encryptedKeyIv,
-      salt: encryptionData.encryptedKeySalt,
-      password,
-    },
-    encryptionData.encryptedKey
-  );
+  try {
+    const decryptedKey = await decrypt(
+      {
+        iv: encryptionData.encryptedKeyIv,
+        salt: encryptionData.encryptedKeySalt,
+        password,
+      },
+      encryptionData.encryptedKey
+    );
 
-  return {
-    iv: encryptionData.genericEncryptionIv,
-    salt: encryptionData.genericEncryptionSalt,
-    password: decryptedKey,
-  } as EncryptionKey;
+    return {
+      iv: encryptionData.genericEncryptionIv,
+      salt: encryptionData.genericEncryptionSalt,
+      password: decryptedKey,
+    } as EncryptionKey;
+  } catch (error) {
+    console.error("Error extracting user encryption:", error);
+    throw error;
+  }
 };
 
 export type EncryptionKey = {
@@ -145,14 +155,19 @@ export const passwordPreServer = async (
   password: string,
   passwordPreServerSalt: string
 ) => {
-  const subjectFormatted = `${password}${passwordPreServerSalt}`;
+  try {
+    const subjectFormatted = `${password}${passwordPreServerSalt}`;
 
-  const hashed = new Uint8Array(
-    await crypto.subtle.digest(
-      "SHA-512",
-      new TextEncoder().encode(subjectFormatted)
-    )
-  );
+    const hashed = new Uint8Array(
+      await crypto.subtle.digest(
+        "SHA-512",
+        new TextEncoder().encode(subjectFormatted)
+      )
+    );
 
-  return btoa(String.fromCharCode(...hashed));
+    return btoa(String.fromCharCode(...hashed));
+  } catch (error) {
+    console.error("Error hashing password:", error);
+    throw error;
+  }
 };

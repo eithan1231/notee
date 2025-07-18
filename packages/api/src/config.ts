@@ -19,6 +19,17 @@ export const ConfigurationOptionsSchema = z.object({
   // password and access their data. If this value ever changes, all user passwords will no longer work.
   PASSWORD_PRE_SERVER_SALT: z.string().min(12).max(128),
 
+  // See this page for some further examples:
+  // https://stackoverflow.com/a/21456918
+  PASSWORD_REGEX: z
+    .string()
+    .default("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"),
+  PASSWORD_REGEX_MESSAGE: z
+    .string()
+    .default(
+      "Password must be at least 8 characters long and contain at least one letter and one number."
+    ),
+
   METRICS_ENABLED: z
     .string()
     .transform((val) => val.toLowerCase() === "true")

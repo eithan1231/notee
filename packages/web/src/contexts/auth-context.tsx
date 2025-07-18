@@ -8,7 +8,9 @@ import {
 } from "react";
 import {
   apiAuthLogin,
+  apiAuthLogout,
   apiAuthMe,
+  apiAuthPassword,
   apiAuthRegister,
   apiAuthRemoveActiveEditor,
   ApiAuthResponse,
@@ -17,6 +19,7 @@ import {
 import { EncryptionKey, extractUserEncryption } from "../util/encryption";
 import { ApiContext, ApiGenericResponse } from "../api";
 import { StorageContext } from "./storage-context";
+import { apiConfigFetch } from "../api/config";
 
 export type AuthContextType = {
   apiContext: ApiContext;
@@ -27,7 +30,12 @@ export type AuthContextType = {
   removeActiveEditor: () => Promise<void>;
   login: (email: string, password: string) => Promise<ApiGenericResponse>;
   register: (email: string, password: string) => Promise<ApiGenericResponse>;
+  passwordUpdate: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<ApiGenericResponse>;
   logout: () => Promise<ApiGenericResponse>;
+  lock: () => Promise<void>;
   decryptEncryptionKey: (password: string) => Promise<boolean>;
 };
 
@@ -48,7 +56,13 @@ export const AuthContext = createContext<AuthContextType>({
   register: async () => {
     throw new Error("Not implemented");
   },
+  passwordUpdate: async () => {
+    throw new Error("Not implemented");
+  },
   logout: async () => {
+    throw new Error("Not implemented");
+  },
+  lock: async () => {
     throw new Error("Not implemented");
   },
   decryptEncryptionKey: async () => {
@@ -173,7 +187,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const register = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string): Promise<ApiGenericResponse> => {
+      const config = await apiConfigFetch();
+
+      if (!config.success) {
+        return { success: false, message: "Failed to fetch configuration" };
+      }
+
+      if (!new RegExp(config.data.passwordRegex).test(password)) {
+        return {
+          success: false,
+          message:
+            config.data.passwordRegexMessage || "Invalid password format",
+        };
+      }
+
       const result = await apiAuthRegister(apiContext, email, password);
 
       if (!result.success) {
@@ -202,9 +230,116 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [storageLoaded, storageData, apiContext]
   );
 
-  const logout = useCallback(async () => {
-    throw new Error("Logout not implemented");
-  }, []);
+  const passwordUpdate = useCallback(
+    async (
+      currentPassword: string,
+      password: string
+    ): Promise<ApiGenericResponse> => {
+      const config = await apiConfigFetch();
+
+      if (!config.success) {
+        return { success: false, message: "Failed to fetch configuration" };
+      }
+
+      if (!new RegExp(config.data.passwordRegex).test(password)) {
+        return {
+          success: false,
+          message:
+            config.data.passwordRegexMessage || "Invalid password format",
+        };
+      }
+
+      if (!auth) {
+        console.warn("passwordUpdate called without auth");
+        return { success: false, message: "Not authenticated" };
+      }
+
+      const result = await apiAuthPassword(
+        apiContext,
+        currentPassword,
+        auth.user.encryption,
+        password
+      );
+
+      if (!result.success) {
+        return result;
+      }
+
+      const me = await apiAuthMe(apiContext);
+      if (!me.success) {
+        throw new Error("Failed to fetch user info after password update");
+      }
+
+      try {
+        const decryptedKey = await extractUserEncryption(
+          me.data.user.encryption,
+          password
+        );
+
+        setAuth(me.data);
+        setKey(decryptedKey);
+
+        if (storageLoaded && storageData.shouldStoreKey) {
+          setStorageData("key", decryptedKey);
+        }
+
+        return result;
+      } catch (error) {
+        console.error("Failed to decrypt new encryption key", error);
+        return {
+          success: false,
+          message: "Failed to decrypt new encryption key",
+        };
+      }
+    },
+    [auth, storageData, apiContext]
+  );
+
+  const logout = useCallback(async (): Promise<ApiGenericResponse> => {
+    if (!auth) {
+      console.warn("logout called without auth");
+      return { success: false, message: "Not authenticated" };
+    }
+
+    const result = await apiAuthLogout(apiContext);
+
+    if (result.success) {
+      setAuth(null);
+      setKey(null);
+      setApiContext({});
+      if (storageLoaded) {
+        setStorageData("key", null);
+      }
+    }
+
+    return result;
+  }, [auth, apiContext, storageLoaded]);
+
+  const lock = useCallback(async () => {
+    if (!auth) {
+      console.warn("lock called without auth");
+      return;
+    }
+
+    if (auth.other.isActiveEditor) {
+      const editorResult = await apiAuthRemoveActiveEditor(apiContext);
+      const resultUser = await apiAuthMe(apiContext);
+
+      if (!editorResult.success) {
+        console.error("Failed to set remove editor", editorResult.message);
+        return;
+      }
+
+      if (resultUser.success) {
+        setAuth(resultUser.data);
+      }
+    }
+
+    setKey(null);
+    if (storageLoaded) {
+      setStorageData("key", null);
+    }
+  }, [auth, storageLoaded, setStorageData]);
 
   const decryptEncryptionKey = useCallback(
     async (password: string) => {
@@ -244,7 +379,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       removeActiveEditor,
       login,
       register,
+      passwordUpdate,
       logout,
+      lock,
       decryptEncryptionKey,
     };
   }, [
@@ -256,7 +393,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     removeActiveEditor,
     login,
     register,
+    passwordUpdate,
     logout,
+    lock,
     decryptEncryptionKey,
   ]);
 

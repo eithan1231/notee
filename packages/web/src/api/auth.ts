@@ -2,6 +2,7 @@ import { ApiContext, ApiGenericResponse } from ".";
 import {
   createUserEncryption,
   passwordPreServer,
+  updateUserEncryption,
   UserEncryptionData,
 } from "../util/encryption";
 import { apiConfigFetch } from "./config";
@@ -101,6 +102,83 @@ export const apiAuthRegister = async (
     return await response.json();
   } catch (error) {
     console.error("Register error:", error);
+    return { success: false, message: "An unexpected error occurred" };
+  }
+};
+
+export const apiAuthPassword = async (
+  context: ApiContext,
+  currentPassword: string,
+  currentEncryption: UserEncryptionData,
+  password: string
+): Promise<ApiGenericResponse> => {
+  try {
+    const config = await apiConfigFetch();
+
+    if (!config.success) {
+      return { success: false, message: "Failed to fetch configuration" };
+    }
+
+    const hashedCurrentPassword = await passwordPreServer(
+      currentPassword,
+      config.data.passwordPreServerSalt
+    );
+
+    const hashedPassword = await passwordPreServer(
+      password,
+      config.data.passwordPreServerSalt
+    );
+
+    const encryption = await updateUserEncryption(
+      currentEncryption,
+      currentPassword,
+      password
+    ).catch(() => {
+      return {
+        message: "Unable to update, check your current password",
+      };
+    });
+
+    if ("message" in encryption) {
+      return { success: false, message: encryption.message };
+    }
+
+    const response = await fetch("/api/auth/password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Session-Tab-Token": context.sessionTabToken ?? "",
+      },
+      body: JSON.stringify({
+        currentPassword: hashedCurrentPassword,
+        password: hashedPassword,
+        encryption,
+      }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Change password error:");
+    console.error(error);
+    return { success: false, message: "An unexpected error occurred" };
+  }
+};
+
+export const apiAuthLogout = async (
+  context: ApiContext
+): Promise<ApiGenericResponse> => {
+  try {
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Session-Tab-Token": context.sessionTabToken ?? "",
+      },
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Logout error:", error);
     return { success: false, message: "An unexpected error occurred" };
   }
 };

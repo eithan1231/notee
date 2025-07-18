@@ -186,7 +186,7 @@ const Component = () => {
 
     await addNodeNote(null, 0, note.data.note.id);
 
-    navigate(`/notee/notes/${note.data.note.id}/`);
+    await navigate(`/notee/notes/${note.data.note.id}/`);
   }, [apiContext, addNodeNote, auth, key, navigate]);
 
   const handleCreateFolder = useCallback(async () => {
@@ -273,7 +273,7 @@ const Component = () => {
                 {!key && (
                   <Link
                     to="/notee/notes/decryption/"
-                    className="mr-10 text-gray-600 hover:text-blue-800 align-center"
+                    className="mr-8 text-gray-600 hover:text-blue-800"
                   >
                     <Lock className="w-5 h-5 mr-1" /> Unlock
                   </Link>
@@ -282,7 +282,7 @@ const Component = () => {
                 {key && auth?.other.isActiveEditor && (
                   <button
                     onClick={handleCreateNote}
-                    className="mr-10 text-gray-600 hover:text-blue-800 align-center"
+                    className="mr-8 text-gray-600 hover:text-blue-800"
                   >
                     <PagePlus className="w-5 h-5 mr-1" /> Note
                   </button>
@@ -291,7 +291,7 @@ const Component = () => {
                 {key && auth?.other.isActiveEditor && (
                   <button
                     onClick={handleCreateFolder}
-                    className="mr-10 text-gray-600 hover:text-blue-800"
+                    className="mr-8 text-gray-600 hover:text-blue-800"
                   >
                     <FolderPlus className="w-5 h-5 mr-1" /> Folder
                   </button>
@@ -299,7 +299,7 @@ const Component = () => {
 
                 <Link
                   to="/notee/notes/settings"
-                  className=" text-gray-600 hover:text-blue-800"
+                  className="mr-8 text-gray-600 hover:text-blue-800"
                 >
                   <Settings className="w-5 h-5 mr-1" /> Settings
                 </Link>

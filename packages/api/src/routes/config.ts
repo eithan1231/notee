@@ -9,6 +9,9 @@ honoConfig.get("/fetch", async (c) => {
     success: true,
     data: {
       passwordPreServerSalt: getConfigOption("PASSWORD_PRE_SERVER_SALT"),
+      passwordRegex: getConfigOption("PASSWORD_REGEX"),
+      passwordRegexMessage: getConfigOption("PASSWORD_REGEX_MESSAGE"),
+
       feature: {
         authRegisterEnabled: getConfigOption("FEATURE_AUTH_REGISTER_ENABLED"),
         authLoginEnabled: getConfigOption("FEATURE_AUTH_LOGIN_ENABLED"),

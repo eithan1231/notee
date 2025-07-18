@@ -4,6 +4,7 @@ import { AuthContext } from "../contexts/auth-context";
 import { NoteTreeContext } from "../contexts/note-tree-context";
 import { Link, Page, Settings } from "iconoir-react";
 import { apiCreateNote } from "../api/note";
+import { encrypt } from "../util/encryption";
 
 type Command = {
   id: string;
@@ -21,8 +22,15 @@ type CommandRank = Command & {
 export const CommandPalletComponent = () => {
   const navigate = useNavigate();
 
-  const { apiContext, auth, key, setActiveEditor, removeActiveEditor } =
-    useContext(AuthContext);
+  const {
+    apiContext,
+    auth,
+    key,
+    setActiveEditor,
+    removeActiveEditor,
+    logout,
+    lock,
+  } = useContext(AuthContext);
 
   const { notes, addNodeNote, addNodeFolder } = useContext(NoteTreeContext);
 
@@ -45,8 +53,8 @@ export const CommandPalletComponent = () => {
           name: note.title,
           description: `Open Note`,
           keywords: ["note"],
-          action: () => {
-            navigate(`/notee/notes/${note.id}`);
+          action: async () => {
+            await navigate(`/notee/notes/${note.id}`);
           },
         });
       }
@@ -60,9 +68,22 @@ export const CommandPalletComponent = () => {
         description: "Create a new note",
         keywords: ["new", "note", "create", "add"],
         action: async () => {
+          if (!key) {
+            const searchParams = new URLSearchParams();
+            searchParams.set("return", window.location.pathname);
+
+            await navigate(
+              `/notee/notes/decryption?${searchParams.toString()}`
+            );
+
+            return;
+          }
+
+          const contentEncrypted = await encrypt(key, "");
+
           const noteResult = await apiCreateNote(apiContext, {
             title: "New Note",
-            content: "",
+            content: contentEncrypted,
           });
 
           if (!noteResult.success) {
@@ -72,7 +93,35 @@ export const CommandPalletComponent = () => {
 
           await addNodeNote(null, 0, noteResult.data.note.id);
 
-          navigate(`/notee/notes/${noteResult.data.note.id}`);
+          await navigate(`/notee/notes/${noteResult.data.note.id}`);
+        },
+      });
+    }
+
+    if (auth) {
+      results.push({
+        id: "logout",
+        type: "action",
+        name: "Logout",
+        description: "Logout from the application",
+        keywords: ["logout", "sign", "out", "exit", "quit"],
+        action: async () => {
+          await logout();
+          await navigate("/notee/auth/login");
+        },
+      });
+    }
+
+    if (key) {
+      results.push({
+        id: "lock",
+        type: "action",
+        name: "Lock",
+        description: "Encrypts all your notes",
+        keywords: ["lock", "encrypt"],
+        action: async () => {
+          await lock();
+          await navigate("/notee/notes/decryption");
         },
       });
     }
@@ -84,8 +133,8 @@ export const CommandPalletComponent = () => {
         name: "Create New Folder",
         description: "Create a new folder",
         keywords: ["new", "folder", "create", "add"],
-        action: () => {
-          addNodeFolder(null, 0, "New Folder");
+        action: async () => {
+          await addNodeFolder(null, 0, "New Folder");
         },
       });
     }
@@ -97,8 +146,8 @@ export const CommandPalletComponent = () => {
         name: "Toggle Active Editor",
         description: "Toggles the active editor state",
         keywords: ["toggle", "editor", "active", "set"],
-        action: () => {
-          removeActiveEditor();
+        action: async () => {
+          await removeActiveEditor();
         },
       });
     } else {
@@ -108,8 +157,8 @@ export const CommandPalletComponent = () => {
         name: "Toggle Active Editor",
         description: "Toggles the active editor state",
         keywords: ["toggle", "editor", "active", "set"],
-        action: () => {
-          setActiveEditor();
+        action: async () => {
+          await setActiveEditor();
         },
       });
     }
@@ -128,8 +177,8 @@ export const CommandPalletComponent = () => {
           "password",
           "notes",
         ],
-        action: () => {
-          navigate("/notee/notes/decryption");
+        action: async () => {
+          await navigate("/notee/notes/decryption");
         },
       });
     }
@@ -140,8 +189,8 @@ export const CommandPalletComponent = () => {
       name: "Home",
       description: "Navigate to home page",
       keywords: ["home", "dashboard", "main"],
-      action: () => {
-        navigate("/notee/notes/");
+      action: async () => {
+        await navigate("/notee/notes/");
       },
     });
 
@@ -151,8 +200,8 @@ export const CommandPalletComponent = () => {
       name: "Settings",
       description: "Navigate to settings page",
       keywords: ["settings", "configuration", "preferences"],
-      action: () => {
-        navigate("/notee/notes/settings");
+      action: async () => {
+        await navigate("/notee/notes/settings");
       },
     });
 

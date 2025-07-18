@@ -6,7 +6,7 @@ import { useConfig } from "../../../hooks/config";
 const Component = () => {
   const navigate = useNavigate();
   const authContext = useContext(AuthContext);
-  const { config } = useConfig();
+  const { config, configError } = useConfig();
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +66,25 @@ const Component = () => {
           </h2>
           <p className="text-gray-600 text-center">
             Please contact support for more information.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (config === null && configError === null) {
+    return "loading....";
+  }
+
+  if (configError) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold mb-6 text-center text-red-600">
+            Error Loading Configuration
+          </h2>
+          <p className="text-gray-600 text-center">
+            {configError || "An unexpected error occurred."}
           </p>
         </div>
       </div>
