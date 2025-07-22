@@ -104,7 +104,7 @@ export const CommandPalletComponent = () => {
         type: "action",
         name: "Logout",
         description: "Logout from the application",
-        keywords: ["logout", "sign", "out", "exit", "quit"],
+        keywords: ["logout", "sign", "out", "exit", "quit", "signout"],
         action: async () => {
           await logout();
           await navigate("/notee/auth/login");
