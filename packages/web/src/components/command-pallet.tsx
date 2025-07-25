@@ -54,7 +54,7 @@ export const CommandPalletComponent = () => {
           description: `Open Note`,
           keywords: ["note"],
           action: async () => {
-            await navigate(`/notee/notes/${note.id}`);
+            await navigate(`/notes/${note.id}`);
           },
         });
       }
@@ -72,9 +72,7 @@ export const CommandPalletComponent = () => {
             const searchParams = new URLSearchParams();
             searchParams.set("return", window.location.pathname);
 
-            await navigate(
-              `/notee/notes/decryption?${searchParams.toString()}`
-            );
+            await navigate(`/notes/decryption?${searchParams.toString()}`);
 
             return;
           }
@@ -93,7 +91,7 @@ export const CommandPalletComponent = () => {
 
           await addNodeNote(null, 0, noteResult.data.note.id);
 
-          await navigate(`/notee/notes/${noteResult.data.note.id}`);
+          await navigate(`/notes/${noteResult.data.note.id}`);
         },
       });
     }
@@ -107,7 +105,7 @@ export const CommandPalletComponent = () => {
         keywords: ["logout", "sign", "out", "exit", "quit", "signout"],
         action: async () => {
           await logout();
-          await navigate("/notee/auth/login");
+          await navigate("/autb/login");
         },
       });
     }
@@ -121,7 +119,7 @@ export const CommandPalletComponent = () => {
         keywords: ["lock", "encrypt"],
         action: async () => {
           await lock();
-          await navigate("/notee/notes/decryption");
+          await navigate("/notes/decryption");
         },
       });
     }
@@ -178,7 +176,7 @@ export const CommandPalletComponent = () => {
           "notes",
         ],
         action: async () => {
-          await navigate("/notee/notes/decryption");
+          await navigate("/notes/decryption");
         },
       });
     }
@@ -190,7 +188,7 @@ export const CommandPalletComponent = () => {
       description: "Navigate to home page",
       keywords: ["home", "dashboard", "main"],
       action: async () => {
-        await navigate("/notee/notes/");
+        await navigate("/notes/");
       },
     });
 
@@ -201,7 +199,7 @@ export const CommandPalletComponent = () => {
       description: "Navigate to settings page",
       keywords: ["settings", "configuration", "preferences"],
       action: async () => {
-        await navigate("/notee/notes/settings");
+        await navigate("/notes/settings");
       },
     });
 
@@ -292,7 +290,7 @@ export const CommandPalletComponent = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === ",") {
-        navigate("/notee/notes/settings");
+        navigate("/notes/settings");
         return;
       }
 

@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
-import { StorageContext } from "../../../contexts/storage-context";
+import { StorageContext } from "../../contexts/storage-context";
 import { NavArrowDown } from "iconoir-react";
-import { AuthContext } from "../../../contexts/auth-context";
+import { AuthContext } from "../../contexts/auth-context";
 import { useNavigate } from "react-router-dom";
 
 const Component = () => {
@@ -37,7 +37,7 @@ const Component = () => {
 
   const handleSignOut = async () => {
     await logout();
-    await navigate("/notee/auth/login");
+    await navigate("/autb/login");
   };
 
   const toggleStoreKey = () => {

@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Link, RouteObject, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../../contexts/auth-context";
-import { useConfig } from "../../../hooks/config";
+import { AuthContext } from "../../contexts/auth-context";
+import { useConfig } from "../../hooks/config";
 
 const Component = () => {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ const Component = () => {
 
   useEffect(() => {
     if (authContext.authInitialised && authContext.auth) {
-      navigate("/notee/notes/");
+      navigate("/notes/");
     }
   }, [authContext.authInitialised, authContext.auth, navigate]);
 
@@ -164,10 +164,7 @@ const Component = () => {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link
-            to="/notee/auth/login"
-            className="text-blue-600 hover:underline"
-          >
+          <Link to="/autb/login" className="text-blue-600 hover:underline">
             Login here
           </Link>
         </p>
@@ -176,6 +173,6 @@ const Component = () => {
   );
 };
 export default {
-  path: "/notee/auth/register",
+  path: "/autb/register",
   Component: Component,
 } as RouteObject;

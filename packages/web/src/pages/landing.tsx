@@ -1,12 +1,26 @@
-import { Link, RouteObject } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { RouteObject, useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/auth-context";
 
 const Component = () => {
-  return (
-    <>
-      This page should not be viewable :) Props to you kiddo. The page you are
-      looking for is <Link to="/notee/">here.</Link>
-    </>
-  );
+  const navigate = useNavigate();
+  const authContext = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!authContext.authInitialised) {
+      return;
+    }
+
+    if (!authContext.auth) {
+      navigate("/autb/login");
+    }
+
+    if (authContext.auth) {
+      navigate("/notes/");
+    }
+  }, [authContext.authInitialised, authContext.auth]);
+
+  return null;
 };
 
 export default {

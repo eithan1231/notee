@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { AuthContext } from "../../../contexts/auth-context";
-import { NoteTreeContext } from "../../../contexts/note-tree-context";
+import { AuthContext } from "../../contexts/auth-context";
+import { NoteTreeContext } from "../../contexts/note-tree-context";
 import ReactMarkdown from "react-markdown";
 
 const Component = () => {

@@ -87,7 +87,7 @@ export const SidebarTree = () => {
         return;
       }
 
-      navigate(`/notee/notes/${id}/`);
+      navigate(`/notes/${id}/`);
     },
     [navigate, treeRef]
   );
@@ -328,7 +328,7 @@ const Node = ({ node, style, dragHandle }: NodeRendererProps<TreeNode>) => {
 
   return (
     <Link
-      to={`/notee/notes/${node.data.id}/`}
+      to={`/notes/${node.data.id}/`}
       onClick={(e) => {
         e.preventDefault();
         sidebarContext.select(node.data.id);

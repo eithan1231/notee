@@ -57,8 +57,6 @@ export async function createApp() {
   app.route("/api/", honoNote);
   app.route("/api/", honoTree);
 
-  app.get("/", async (c) => c.redirect("/notee/"));
-
   app.use(
     "/*",
     serveStatic({

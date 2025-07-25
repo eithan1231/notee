@@ -1,10 +1,10 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AuthContext } from "../../../contexts/auth-context";
+import { AuthContext } from "../../contexts/auth-context";
 import ReactMarkdown from "react-markdown";
-import { apiGetNote, apiUpdateNote, Note } from "../../../api/note";
-import { decrypt, encrypt } from "../../../util/encryption";
-import { useDisplayMode } from "../../../hooks/display-mode";
+import { apiGetNote, apiUpdateNote, Note } from "../../api/note";
+import { decrypt, encrypt } from "../../util/encryption";
+import { useDisplayMode } from "../../hooks/display-mode";
 
 const Component = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const Component = () => {
       setNoteTitle(null);
       setNoteContent(null);
 
-      navigate("/notee/notes/");
+      navigate("/notes/");
       return;
     }
 
@@ -38,9 +38,7 @@ const Component = () => {
 
     if (!key) {
       navigate(
-        `/notee/notes/decryption?return=${encodeURIComponent(
-          "/notee/notes/" + noteId
-        )}`
+        `/notes/decryption?return=${encodeURIComponent("/notes/" + noteId)}`
       );
       return;
     }

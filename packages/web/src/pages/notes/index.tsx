@@ -22,19 +22,19 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { SidebarTree } from "../../../components/sidebar-tree";
-import { AuthContext } from "../../../contexts/auth-context";
-import { NoteTreeContext } from "../../../contexts/note-tree-context";
-import { StorageContext } from "../../../contexts/storage-context";
-import { useDisplayMode } from "../../../hooks/display-mode";
+import { SidebarTree } from "../../components/sidebar-tree";
+import { AuthContext } from "../../contexts/auth-context";
+import { NoteTreeContext } from "../../contexts/note-tree-context";
+import { StorageContext } from "../../contexts/storage-context";
+import { useDisplayMode } from "../../hooks/display-mode";
 
 import NoteEditComponent from "./[noteId]";
 import LandingComponent from "./landing";
 import SettingsComponent from "./settings";
 import DecryptionComponent from "./decryption";
-import { CommandPalletComponent } from "../../../components/command-pallet";
-import { apiCreateNote } from "../../../api/note";
-import { encrypt } from "../../../util/encryption";
+import { CommandPalletComponent } from "../../components/command-pallet";
+import { apiCreateNote } from "../../api/note";
+import { encrypt } from "../../util/encryption";
 
 const Component = () => {
   const navigate = useNavigate();
@@ -143,7 +143,7 @@ const Component = () => {
 
   useEffect(() => {
     if (authInitialised && !auth) {
-      navigate("/notee/auth/login");
+      navigate("/autb/login");
     }
   }, [authInitialised, auth, navigate]);
 
@@ -186,7 +186,7 @@ const Component = () => {
 
     await addNodeNote(null, 0, note.data.note.id);
 
-    await navigate(`/notee/notes/${note.data.note.id}/`);
+    await navigate(`/notes/${note.data.note.id}/`);
   }, [apiContext, addNodeNote, auth, key, navigate]);
 
   const handleCreateFolder = useCallback(async () => {
@@ -272,7 +272,7 @@ const Component = () => {
               <div className="px-4 pt-4 pb-4 flex align-center">
                 {!key && (
                   <Link
-                    to="/notee/notes/decryption/"
+                    to="/notes/decryption/"
                     className="mr-8 text-gray-600 hover:text-blue-800"
                   >
                     <Lock className="w-5 h-5 mr-1" /> Unlock
@@ -298,7 +298,7 @@ const Component = () => {
                 )}
 
                 <Link
-                  to="/notee/notes/settings"
+                  to="/notes/settings"
                   className="mr-8 text-gray-600 hover:text-blue-800"
                 >
                   <Settings className="w-5 h-5 mr-1" /> Settings
@@ -357,7 +357,7 @@ const Component = () => {
 };
 
 export default {
-  path: "/notee/notes/",
+  path: "/notes/",
   Component,
   children: [
     {

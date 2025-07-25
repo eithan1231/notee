@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../contexts/auth-context";
+import { AuthContext } from "../../contexts/auth-context";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useConfig } from "../../../hooks/config";
+import { useConfig } from "../../hooks/config";
 
 const Component = () => {
   const navigate = useNavigate();
@@ -25,12 +25,12 @@ const Component = () => {
 
     const returnPage = searchParams.get("return");
 
-    if (returnPage?.startsWith("/notee/notes/")) {
+    if (returnPage?.startsWith("/notes/")) {
       navigate(returnPage);
       return;
     }
 
-    navigate("/notee/notes/");
+    navigate("/notes/");
   }, [authInitialised, key, navigate, searchParams, config]);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -1,6 +1,16 @@
-import { Link, RouteObject } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, RouteObject, useNavigate } from "react-router-dom";
 
 const Component = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const legacyGlobalSuffix = "/notee";
+    if (window.location.pathname.startsWith(legacyGlobalSuffix)) {
+      navigate(window.location.pathname.substring(legacyGlobalSuffix.length));
+    }
+  }, []);
+
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="text-center">
