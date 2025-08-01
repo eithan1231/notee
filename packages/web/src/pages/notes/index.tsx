@@ -143,7 +143,7 @@ const Component = () => {
 
   useEffect(() => {
     if (authInitialised && !auth) {
-      navigate("/autb/login");
+      navigate("/auth/login");
     }
   }, [authInitialised, auth, navigate]);
 

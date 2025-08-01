@@ -37,7 +37,7 @@ const Component = () => {
 
   const handleSignOut = async () => {
     await logout();
-    await navigate("/autb/login");
+    await navigate("/auth/login");
   };
 
   const toggleStoreKey = () => {

@@ -12,7 +12,7 @@ const Component = () => {
     }
 
     if (!authContext.auth) {
-      navigate("/autb/login");
+      navigate("/auth/login");
     }
 
     if (authContext.auth) {

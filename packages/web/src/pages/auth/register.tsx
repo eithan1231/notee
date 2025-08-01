@@ -164,7 +164,7 @@ const Component = () => {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link to="/autb/login" className="text-blue-600 hover:underline">
+          <Link to="/auth/login" className="text-blue-600 hover:underline">
             Login here
           </Link>
         </p>
@@ -173,6 +173,6 @@ const Component = () => {
   );
 };
 export default {
-  path: "/autb/register",
+  path: "/auth/register",
   Component: Component,
 } as RouteObject;

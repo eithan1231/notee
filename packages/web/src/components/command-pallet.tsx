@@ -64,7 +64,7 @@ export const CommandPalletComponent = () => {
       results.push({
         id: "new-note",
         type: "action",
-        name: " Create New Note",
+        name: "Create New Note",
         description: "Create a new note",
         keywords: ["new", "note", "create", "add"],
         action: async () => {
@@ -105,7 +105,7 @@ export const CommandPalletComponent = () => {
         keywords: ["logout", "sign", "out", "exit", "quit", "signout"],
         action: async () => {
           await logout();
-          await navigate("/autb/login");
+          await navigate("/auth/login");
         },
       });
     }
