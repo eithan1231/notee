@@ -4,7 +4,7 @@ import { StorageContext } from "../contexts/storage-context";
 import { NoteTreeContext } from "../contexts/note-tree-context";
 
 export const DebugComponent = () => {
-  const authContext = useContext(AuthContext);
+  const { auth } = useContext(AuthContext);
   const { notes, tree } = useContext(NoteTreeContext);
   const storageContext = useContext(StorageContext);
 
@@ -17,27 +17,32 @@ export const DebugComponent = () => {
         This page is for debugging purposes. It will display debug information
         about the current user and the application.
       </p>
-
       <p className="mb-4">
         <pre className="bg-gray-100 p-2 rounded">
           Has Crypto Support: {hasCryptoSubtleSupport ? "Yes" : "No"}
         </pre>
       </p>
-
       <h2 className="text-2xl font-semibold mb-2">Auth context:</h2>
+      <span>
+        session expires in{" "}
+        {(
+          (new Date(auth?.session.expiry!).getTime() - Date.now()) /
+          1000
+        ).toFixed(2)}{" "}
+        seconds
+      </span>
       <p className="mb-4 overflow-scroll">
-        {authContext.auth ? (
+        {auth ? (
           <pre className="bg-gray-100 p-2 rounded">
-            {JSON.stringify(authContext.auth, null, 2)}
+            {JSON.stringify(auth, null, 2)}
           </pre>
         ) : (
           "Not authenticated"
         )}
       </p>
-
       <h2 className="text-2xl font-semibold mb-2">Notes Tree Context:</h2>
       <p className="mb-4 overflow-scroll">
-        {authContext.auth ? (
+        {tree ? (
           <>
             <pre className="bg-gray-100 p-2 rounded">
               {JSON.stringify(tree, null, 2)}
@@ -50,10 +55,9 @@ export const DebugComponent = () => {
           "Not authenticated"
         )}
       </p>
-
       <h2 className="text-2xl font-semibold mb-2">Storage Context:</h2>
       <p className="mb-4 overflow-scroll">
-        {authContext.auth ? (
+        {storageContext ? (
           <pre className="bg-gray-100 p-2 rounded">
             {JSON.stringify(storageContext, null, 2)}
           </pre>

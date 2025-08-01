@@ -35,6 +35,10 @@ const Component = () => {
     );
   }
 
+  const handleSecretDebug = async () => {
+    await navigate("/notes/debug");
+  };
+
   const handleSignOut = async () => {
     await logout();
     await navigate("/auth/login");
@@ -122,20 +126,26 @@ const Component = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div className="max-w-2xl mx-auto p-6">
       <div className="mb-6 justify-center text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">Settings</h1>
+        <h1
+          className="text-2xl font-bold text-gray-900 mb-3"
+          onDoubleClick={handleSecretDebug}
+        >
+          Settings
+        </h1>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">
+          Account Settings
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Manage your account settings below.
+        </p>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
-            Account Settings
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Manage your account settings below.
-          </p>
-        </div>
         <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1">
             <h3 className="text-lg font-medium text-gray-900">Sign Out</h3>
@@ -276,17 +286,19 @@ const Component = () => {
             />
           </button>
         </div>
+      </div>
 
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
-            Storage Settings
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Manage your local storage settings below. These settings will not
-            sync to other devices.
-          </p>
-        </div>
+      <div className="mt-10">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">
+          Storage Settings
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Manage your local storage settings below. These settings will not sync
+          to other devices.
+        </p>
+      </div>
 
+      <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1">
             <h3 className="text-lg font-medium text-gray-900">

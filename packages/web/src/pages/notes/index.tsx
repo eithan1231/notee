@@ -27,14 +27,15 @@ import { AuthContext } from "../../contexts/auth-context";
 import { NoteTreeContext } from "../../contexts/note-tree-context";
 import { StorageContext } from "../../contexts/storage-context";
 import { useDisplayMode } from "../../hooks/display-mode";
+import { CommandPalletComponent } from "../../components/command-pallet";
+import { apiCreateNote } from "../../api/note";
+import { encrypt } from "../../util/encryption";
 
 import NoteEditComponent from "./[noteId]";
 import LandingComponent from "./landing";
 import SettingsComponent from "./settings";
+import DebugComponent from "./debug";
 import DecryptionComponent from "./decryption";
-import { CommandPalletComponent } from "../../components/command-pallet";
-import { apiCreateNote } from "../../api/note";
-import { encrypt } from "../../util/encryption";
 
 const Component = () => {
   const navigate = useNavigate();
@@ -213,21 +214,23 @@ const Component = () => {
             // disabled={isUpdatingActiveEditor}
             onClick={toggleEditorMode}
             className={`
-            border-transparent focus:border-transparent focus:ring-0
-            relative inline-flex h-6 w-11 items-center rounded-full
-            transition-colors focus:outline-none
-            ${auth?.other.isActiveEditor ? "bg-blue-600" : "bg-gray-200"}
-            ${
-              // isUpdatingActiveEditor
-              false ? "opacity-50 cursor-not-allowed" : ""
-            }
-          `}
+              border-transparent focus:border-transparent focus:ring-0
+              relative inline-flex h-6 w-11 items-center rounded-full
+              transition-colors focus:outline-none
+              ${auth?.other.isActiveEditor ? "bg-blue-600" : "bg-gray-200"}
+              ${
+                // isUpdatingActiveEditor
+                false ? "opacity-50 cursor-not-allowed" : ""
+              }
+            `}
           >
             <span
               className={`
-              inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-              ${auth?.other.isActiveEditor ? "translate-x-6" : "translate-x-1"}
-            `}
+                inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                ${
+                  auth?.other.isActiveEditor ? "translate-x-6" : "translate-x-1"
+                }
+              `}
             >
               {auth?.other.isActiveEditor ? (
                 <EditPencil className="w-3 h-3 text-blue-600 m-0.5" />
@@ -240,9 +243,9 @@ const Component = () => {
 
         <div
           className={`
-          ${displayMode === "desktop" ? "flex flex-row" : ""}
-          h-[calc(100vh-4rem)]
-        `}
+            ${displayMode === "desktop" ? "flex flex-row" : ""}
+            h-[calc(100vh-4rem)]
+          `}
         >
           <aside
             ref={sidebarRef}
@@ -339,13 +342,13 @@ const Component = () => {
           displayMode === "desktop" ? (
             <main
               className={`
-            ${displayMode === "desktop" ? "flex-1 flex flex-col" : ""}
-            h-full
-            bg-white
-            shadow-[rgba(0,0,0,0.25)_2px_32px_-2px_8px]
-            rounded-tr-[10px] rounded-br-[10px]
-            z-1
-          `}
+                ${displayMode === "desktop" ? "flex-1 flex flex-col" : ""}
+                h-full
+                bg-white
+                shadow-[rgba(0,0,0,0.25)_2px_32px_-2px_8px]
+                rounded-tr-[10px] rounded-br-[10px]
+                z-1
+              `}
             >
               <Outlet />
             </main>
@@ -371,6 +374,10 @@ export default {
     {
       path: "decryption/",
       Component: DecryptionComponent,
+    },
+    {
+      path: "debug/",
+      Component: DebugComponent,
     },
     {
       path: ":noteId/",
